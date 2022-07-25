@@ -1016,13 +1016,6 @@ export async function getFeeHistory<ReturnFormat extends DataFormat>(
 }
 /**
  *
- * @param data
- */
-function isRevertReasonString(data: string) {
-	return data.includes('08c379a0');
-}
-/**
- *
  * @param web3Context
  * @param transaction
  */
