@@ -27,7 +27,7 @@ import {
 } from 'web3-errors';
 import { keccak256 } from 'ethereum-cryptography/keccak';
 import { isAddress, isHexStrict, isNullish } from 'web3-validator';
-import { Numbers, TypedObject, TypedObjectAbbreviated, EncodingTypes, Bytes } from './types';
+import { Numbers, TypedObject, TypedObjectAbbreviated, EncodingTypes, Bytes } from 'web3-types';
 import { leftPad, rightPad, toTwosComplement } from './string_manipulation';
 import { utf8ToHex, hexToBytes, toNumber, bytesToHex } from './converters';
 
@@ -119,7 +119,7 @@ const parseTypeN = (value: string, typeLength: number): number => {
  *
  * @param value
  */
-const bitLength = (value: BigInt | number): number => {
+const bitLength = (value: bigint | number): number => {
 	const updatedVal = value.toString(2);
 	return updatedVal.length;
 };

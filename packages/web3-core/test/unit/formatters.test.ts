@@ -16,6 +16,7 @@ along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as utils from 'web3-utils';
+import { BlockTags } from 'web3-types';
 import { Iban } from 'web3-eth-iban';
 import {
 	inputAddressFormatter,
@@ -94,7 +95,7 @@ describe('formatters', () => {
 			expect(inputBlockNumberFormatter(undefined)).toBeUndefined();
 		});
 
-		it.each([utils.BlockTags.EARLIEST, utils.BlockTags.LATEST, utils.BlockTags.PENDING])(
+		it.each([BlockTags.EARLIEST, BlockTags.LATEST, BlockTags.PENDING])(
 			'should return "%s" values for "%s" block numbers',
 			blockNumber => {
 				expect(inputBlockNumberFormatter(blockNumber)).toEqual(blockNumber);
@@ -264,7 +265,7 @@ describe('formatters', () => {
 
 			expect(utils.sha3Raw).toHaveBeenCalledWith('blockHashtransactionHashlogIndex');
 
-			expect(result.id).toEqual(`log_${sha3Result.slice(0, 8)}`);
+			expect(result.id).toBe(`log_${sha3Result.slice(0, 8)}`);
 		});
 
 		it('should convert "blockNumber" from hex to number', () => {

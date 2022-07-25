@@ -16,20 +16,13 @@ along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import {
-	DataFormat,
-	DEFAULT_RETURN_FORMAT,
-	EthExecutionAPI,
-	format,
 	inputAddressFormatter,
 	inputLogFormatter,
-	isDataFormat,
-	LogsInput,
-	Mutable,
-	TransactionReceipt,
+	Web3Context,
 	Web3EventEmitter,
 	Web3PromiEvent,
-} from 'web3-common';
-import { Web3Context } from 'web3-core';
+} from 'web3-core';
+import { SubscriptionError } from 'web3-errors';
 import {
 	call,
 	estimateGas,
@@ -60,12 +53,20 @@ import {
 	BlockNumberOrTag,
 	BlockTags,
 	Bytes,
+	EthExecutionAPI,
 	Filter,
 	HexString,
+	LogsInput,
+	Mutable,
+} from 'web3-types';
+import {
+	DataFormat,
+	DEFAULT_RETURN_FORMAT,
+	format,
+	isDataFormat,
 	toChecksumAddress,
 } from 'web3-utils';
 import { isNullish, validator } from 'web3-validator';
-import { SubscriptionError } from 'web3-errors';
 import { ALL_EVENTS_ABI } from './constants';
 import { decodeEventABI, decodeMethodReturn, encodeEventABI, encodeMethodABI } from './encoding';
 import { Web3ContractError } from './errors';
@@ -683,7 +684,7 @@ export class Contract<Abi extends ContractAbi>
 
 				return this._contractMethodDeploySend(
 					abi as AbiFunctionFragment,
-					args,
+					args as unknown[],
 					modifiedOptions,
 					contractOptions,
 				);
@@ -699,7 +700,7 @@ export class Contract<Abi extends ContractAbi>
 
 				return this._contractMethodEstimateGas({
 					abi: abi as AbiFunctionFragment,
-					params: args,
+					params: args as unknown[],
 					returnFormat,
 					options: modifiedOptions,
 					contractOptions,
@@ -708,7 +709,7 @@ export class Contract<Abi extends ContractAbi>
 			encodeABI: () =>
 				encodeMethodABI(
 					abi as AbiFunctionFragment,
-					args,
+					args as unknown[],
 					format({ eth: 'bytes' }, data as Bytes, DEFAULT_RETURN_FORMAT),
 				),
 		};
@@ -998,10 +999,7 @@ export class Contract<Abi extends ContractAbi>
 		return sendTransaction(this, tx, DEFAULT_RETURN_FORMAT, {
 			transactionResolver: receipt => {
 				if (receipt.status === BigInt(0)) {
-					throw new Web3ContractError(
-						"code couldn't be stored",
-						receipt as TransactionReceipt,
-					);
+					throw new Web3ContractError("code couldn't be stored", receipt);
 				}
 
 				const newContract = this.clone();
