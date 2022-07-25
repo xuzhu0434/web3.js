@@ -42,7 +42,7 @@ import {
 	HexStringBytes,
 } from 'web3-utils';
 import { isBlockTag, isBytes, isNullish, isString } from 'web3-validator';
-import { TransactionError } from 'web3-errors';
+import { TransactionError, TransactionRevertedError } from 'web3-errors';
 import { SignatureError } from './errors';
 import * as rpcMethods from './rpc_methods';
 import {
@@ -507,6 +507,14 @@ export function sendTransaction<
 							ETH_DATA_FORMAT,
 						);
 
+						if (web3Context.handleRevert) {
+							// eslint-disable-next-line no-use-before-define
+							await getRevertReason(
+								web3Context,
+								transactionFormatted as TransactionCall,
+							);
+						}
+
 						if (
 							!options?.ignoreGasPricing &&
 							isNullish(transactionFormatted.gasPrice) &&
@@ -676,6 +684,11 @@ export function sendSignedTransaction<
 						if (promiEvent.listenerCount('sending') > 0) {
 							promiEvent.emit('sending', signedTransactionFormattedHex);
 						}
+						// todo enable handleRevert for sendSignedTransaction when we have a function to decode transactions
+						// importing a package for this would increase the size of the library
+						// if (web3Context.handleRevert) {
+						// 	await getRevertReason(web3Context, options, transaction);
+						// }
 
 						const transactionHash = await rpcMethods.sendRawTransaction(
 							web3Context.requestManager,
@@ -1007,4 +1020,26 @@ export async function getFeeHistory<ReturnFormat extends DataFormat>(
 	);
 
 	return format(feeHistorySchema, response as unknown as FeeHistory, returnFormat);
+}
+/**
+ *
+ * @param data
+ */
+function isRevertReasonString(data: string) {
+	return data.includes('08c379a0');
+}
+/**
+ *
+ * @param web3Context
+ * @param transaction
+ */
+async function getRevertReason(
+	web3Context: Web3Context<EthExecutionAPI>,
+	transaction: TransactionCall,
+) {
+	try {
+		await call(web3Context, transaction, web3Context.defaultBlock, DEFAULT_RETURN_FORMAT);
+	} catch (err) {
+		throw new TransactionRevertedError((err as Error).message.split(': ').pop() as string);
+	}
 }
